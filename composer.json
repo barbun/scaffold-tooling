@@ -15,7 +15,7 @@
     "drupal/purge_queuer_coretags": "3.4",
     "drupal/purge_purger_http": "^1.0",
     "phpstan/extension-installer": "^1.1.0",
-    "spaze/phpstan-disallowed-calls": "^2.3.0",
+    "spaze/phpstan-disallowed-calls": "2.15.0",
     "cweagans/composer-patches": "^1.7"
   },
   "require-dev": {
