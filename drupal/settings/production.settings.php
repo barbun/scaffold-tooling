@@ -60,3 +60,11 @@ $config['lagoon_logs.settings']['disable'] = 0;
  */
 // Security.txt must be enabled.
 $config['securitytxt.settings']['enabled'] = TRUE;
+
+// Enforce TFA.
+if (empty(getenv('GOVCMS_TFA_DISABLE_ENFORCED'))) {
+  $config['tfa.settings']['enabled'] = TRUE;
+}
+if (empty(getenv('GOVCMS_TFA_DISABLE_REQUIRED_ROLES'))) {
+  $config['tfa.settings']['required_roles']['authenticated'] = 'authenticated';
+}
