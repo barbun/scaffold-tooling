@@ -67,4 +67,5 @@ if (empty(getenv('GOVCMS_TFA_DISABLE_ENFORCED'))) {
 }
 if (empty(getenv('GOVCMS_TFA_DISABLE_REQUIRED_ROLES'))) {
   $config['tfa.settings']['required_roles']['authenticated'] = 'authenticated';
+  $config['user.role.authenticated']['permissions'][999999] = 'setup own tfa';
 }
