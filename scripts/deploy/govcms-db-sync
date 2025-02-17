@@ -79,6 +79,9 @@ echo "[info]: Preparing database sync"
   --skip-tables-key=common -y
 "$DRUSH" rsync --alias-path="$GOVCMS_SITE_ALIAS_PATH" @"$GOVCMS_SITE_ALIAS":/tmp/sync.sql.gz /tmp/ -y
 
+echo "[info]: Dropping existing database via drush"
+"$DRUSH" sql:drop -y
+
 if [[ "$DB_LOAD_NO_DRUSH" = TRUE ]]; then
   DB_CONF=$("$DRUSH" sql:conf --show-passwords --format=json 2>&1)
   DB_NAME=$(echo "$DB_CONF" | jq -r '.database')
