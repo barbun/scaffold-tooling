@@ -20,7 +20,6 @@
     "phar-io/manifest": "2.0.3",
     "phar-io/version": "3.2.1",
     "webflo/drupal-finder": "1.2.2",
-    "webmozart/path-util": "2.3.0",
     "dealerdirect/phpcodesniffer-composer-installer": "1.0",
     "zaporylie/composer-drupal-optimizations": "^1.0",
     "php-parallel-lint/php-parallel-lint": "^1.2"
