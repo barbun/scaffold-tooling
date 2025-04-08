@@ -171,9 +171,11 @@ checks:
       path: config/default
       required:
         - govcms_security
+        - httpav
         - lagoon_logs
         - tfa
       disallowed:
+        - clamav
         - dblog
         - devel
         - module_permissions_ui
@@ -190,9 +192,11 @@ checks:
       severity: high
       required:
         - govcms_security
+        - httpav
         - lagoon_logs
         - tfa
       disallowed:
+        - clamav
         - dblog
         - devel
         - module_permissions_ui
