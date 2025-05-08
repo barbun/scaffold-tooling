@@ -135,7 +135,7 @@ shipshape:
         - tests/shipshape-results.xml
     when: always
   script:
-    - cp shipshape.paas.yml /govcms/shipshape.paas.yml
+    - cp "${CI_PROJECT_DIR}/shipshape.paas.yml" /govcms/shipshape.paas.yml
     - shipshape run . -f /govcms/shipshape.yml -f /govcms/shipshape.paas.yml --exclude-db --error-code -o junit > tests/shipshape-results.xml
   when: on_success
   allow_failure: true
