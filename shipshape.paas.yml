@@ -1,0 +1,15 @@
+# Shipshape checks specifically for PaaS.
+checks:
+  yaml:
+    - name: "PaaS Gitlab CI file"
+      severity: low
+      file: .gitlab-ci.yml
+      ignore-missing: true
+      optional: true
+      values:
+        - key: include.project
+          value: 'govcms/scaffold-tooling'
+        - key: include.file
+          value: '.gitlab-ci-main.yml'
+        - key: include.ref
+          value: '5.4.0'
