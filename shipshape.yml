@@ -191,6 +191,7 @@ checks:
     - name: '[DATABASE] Active modules audit'
       severity: high
       required:
+        - govcms_akamai_purge
         - govcms_security
         - httpav
         - lagoon_logs
