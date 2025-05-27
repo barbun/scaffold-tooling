@@ -170,6 +170,7 @@ checks:
       severity: high
       path: config/default
       required:
+        - govcms_akamai_purge
         - govcms_security
         - httpav
         - lagoon_logs
