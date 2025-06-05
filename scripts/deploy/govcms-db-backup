@@ -41,7 +41,7 @@ if [ "$(jq -r '.bootstrap' 2> /dev/null <<< "$STATUS")" != "Successful" ]; then
 fi
 
 mkdir -p "$GOVCMS_BACKUP_DIR"
-"$DRUSH" sql:dump --gzip --extra-dump=--no-tablespaces --result-file="$GOVCMS_BACKUP_DIR/pre-deploy-dump.sql"
+"$DRUSH" sql:dump --database=read --gzip --extra-dump=--no-tablespaces --result-file="$GOVCMS_BACKUP_DIR/pre-deploy-dump.sql"
 
 echo "[info]: Backup saved to $GOVCMS_BACKUP_DIR/pre-deploy-dump.sql."
 
