@@ -13,6 +13,7 @@ set -euo pipefail
 LAGOON_ENVIRONMENT_TYPE=${LAGOON_ENVIRONMENT_TYPE:-production}
 GOVCMS_BACKUP_DIR=${GOVCMS_BACKUP_DIR:-/app/web/sites/default/files/private/backups}
 GOVCMS_SKIP_DATABASE_BACKUP=${GOVCMS_SKIP_DATABASE_BACKUP:-}
+MARIADB_READREPLICA_HOSTS="${MARIADB_READREPLICA_HOSTS:-}"
 
 # Drush 12 support.
 DRUSH="${GOVCMS_DRUSH:-none}"
@@ -40,8 +41,23 @@ if [ "$(jq -r '.bootstrap' 2> /dev/null <<< "$STATUS")" != "Successful" ]; then
   exit 0 # Perhaps exit > 0 to fail the build?
 fi
 
+# Check for read database availability
+dump_opts=""
+if [[ -n "$MARIADB_READREPLICA_HOSTS" ]]; then
+  echo "Checking for read database availability..."
+  if tables=$("$DRUSH" sqlq 'show tables;' --database=read 2> /dev/null) && [ -n "$tables" ]; then
+    echo "Read replica database is available, using --database=read flag"
+    dump_opts="--database=read"
+  else
+    echo "Read database not available, using default database."
+  fi
+else
+  echo "No read replica hosts configured using default database."
+fi
+
 mkdir -p "$GOVCMS_BACKUP_DIR"
-"$DRUSH" sql:dump --database=read --gzip --extra-dump=--no-tablespaces --result-file="$GOVCMS_BACKUP_DIR/pre-deploy-dump.sql"
+# shellcheck disable=SC2086
+"$DRUSH" sql:dump $dump_opts --gzip --extra-dump=--no-tablespaces --result-file="$GOVCMS_BACKUP_DIR/pre-deploy-dump.sql"
 
 echo "[info]: Backup saved to $GOVCMS_BACKUP_DIR/pre-deploy-dump.sql."
 
