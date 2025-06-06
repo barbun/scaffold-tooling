@@ -87,6 +87,48 @@ setup() {
   assert_equal 1 "$(mock_get_call_num "${mock_drush}")"
 }
 
+@test "Database sync: development with read replica available" {
+  mock_drush=$(mock_command "drush")
+  mock_set_output "${mock_drush}" '{"bootstrap": "Successful"}' 1
+  mock_set_output "${mock_drush}" "table1\ntable2" 2
+  mock_gunzip=$(mock_command "gunzip")
+
+  export LAGOON_ENVIRONMENT_TYPE=development
+  export GOVCMS_DEPLOY_WORKFLOW_CONTENT=import
+  export GOVCMS_SITE_ALIAS=
+  export GOVCMS_SITE_ALIAS_PATH=
+  export MARIADB_READREPLICA_HOSTS="dbreplicahost1"
+
+  run scripts/deploy/govcms-db-sync >&3
+
+  assert_output_contains "GovCMS Deploy :: Database synchronisation"
+  assert_output_contains "Checking for read database availability..."
+  assert_output_contains "Read replica database is available, using --database=read flag"
+  assert_equal "sqlq 'show tables;' --database=read" "$(mock_get_call_args "${mock_drush}" 2)"
+  assert_equal "--alias-path=/app/drush/sites @govcms.prod sql:dump --database=read --gzip --extra-dump=--no-tablespaces --structure-tables-list=search_index,search_total,redirect_404,cache,cache_* --result-file=/tmp/sync.sql --skip-tables-key=common -y" "$(mock_get_call_args "${mock_drush}" 3)"
+}
+
+@test "Database sync: development with read replica unavailable" {
+  mock_drush=$(mock_command "drush")
+  mock_set_output "${mock_drush}" '{"bootstrap": "Successful"}' 1
+  mock_set_output "${mock_drush}" "" 2
+  mock_gunzip=$(mock_command "gunzip")
+
+  export LAGOON_ENVIRONMENT_TYPE=development
+  export GOVCMS_DEPLOY_WORKFLOW_CONTENT=import
+  export GOVCMS_SITE_ALIAS=
+  export GOVCMS_SITE_ALIAS_PATH=
+  export MARIADB_READREPLICA_HOSTS="dbreplicahost1"
+
+  run scripts/deploy/govcms-db-sync >&3
+
+  assert_output_contains "GovCMS Deploy :: Database synchronisation"
+  assert_output_contains "Checking for read database availability..."
+  assert_output_contains "Read database not available, using default database."
+  assert_equal "sqlq 'show tables;' --database=read" "$(mock_get_call_args "${mock_drush}" 2)"
+  assert_equal "--alias-path=/app/drush/sites @govcms.prod sql:dump --gzip --extra-dump=--no-tablespaces --structure-tables-list=search_index,search_total,redirect_404,cache,cache_* --result-file=/tmp/sync.sql --skip-tables-key=common -y" "$(mock_get_call_args "${mock_drush}" 3)"
+}
+
 @test "Database sync: development, no existing site" {
   mock_drush=$(mock_command "drush")
   mock_set_output "${mock_drush}" "Failed" 1

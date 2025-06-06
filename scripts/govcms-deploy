@@ -46,11 +46,17 @@ mkdir -p "$APP/web/sites/default/files/private/tmp"
 dump_opts=""
 read_replica_enabled () {
   if [[ -z "$MARIADB_READREPLICA_HOSTS" ]]; then
+    echo "No read replica hosts configured using default database."
     return
   fi
 
+  echo "Checking for read database availability..."
   if tables=$("$DRUSH" sqlq 'show tables;' --database=read 2> /dev/null) && [ -n "$tables" ]; then
+    echo "Read replica database is available, using --database=read flag"
     dump_opts="--database=read"
+  else
+    echo "Read database not available, using default database."
+    dump_opts=""
   fi
 }
 
@@ -60,7 +66,7 @@ common_deploy () {
   if [[ "$LAGOON_ENVIRONMENT_TYPE" = "development" && "$GOVCMS_DEPLOY_WORKFLOW_CONTENT" = "import" ]]; then
     echo "Performing content import."
     # shellcheck disable=SC2086
-    "$DRUSH" --alias-path=/app/drush/sites @govcms.prod sql:dump --gzip --extra-dump=--no-tablespaces --result-file=/tmp/sync.sql -y
+    "$DRUSH" --alias-path=/app/drush/sites @govcms.prod sql:dump $dump_opts --gzip --extra-dump=--no-tablespaces --result-file=/tmp/sync.sql -y
     "$DRUSH" rsync --alias-path=/app/drush/sites @govcms.prod:/tmp/sync.sql.gz /tmp/ -y
     gunzip < /tmp/sync.sql.gz | "$DRUSH" sqlc
     rm /tmp/sync.sql.gz
@@ -112,7 +118,7 @@ else
       # In a non-functioning development site, import the database from production before running import.
       # Note, this would destroy data in a dev site that was just broken temporarily. Review?
       # shellcheck disable=SC2086
-      "$DRUSH" --alias-path=/app/drush/sites @govcms.prod sql:dump --gzip --extra-dump=--no-tablespaces --result-file=/tmp/sync.sql -y
+      "$DRUSH" --alias-path=/app/drush/sites @govcms.prod sql:dump $dump_opts --gzip --extra-dump=--no-tablespaces --result-file=/tmp/sync.sql -y
       "$DRUSH" rsync --alias-path=/app/drush/sites @govcms.prod:/tmp/sync.sql.gz /tmp/ -y
       gunzip < /tmp/sync.sql.gz | "$DRUSH" sqlc
       rm /tmp/sync.sql.gz
