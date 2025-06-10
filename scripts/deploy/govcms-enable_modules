@@ -33,6 +33,7 @@ fi
 
 MODULES=$("$DRUSH" pm:list --status=enabled)
 NON_PROD_MODULES=("stage_file_proxy")
+PROD_ONLY_MODULES=("google_tag")
 AV=$([ -z "${HTTPAV_ENDPOINT:-}" ] && echo "clamav" || echo "httpav")
 PLATFORM_MODULES=(
   "redis"
@@ -50,6 +51,14 @@ if [ "$LAGOON_ENVIRONMENT_TYPE" != "production" ]; then
   for MODULE in "${NON_PROD_MODULES[@]}"; do
     if [[ $(echo "$MODULES" | grep -c "$MODULE") -eq 0 ]]; then
       MODULE_LIST="$MODULE_LIST $MODULE"
+    fi
+  done
+
+  # Disalbe modules we do not want on in non-prod sites
+  for MODULE in "${PROD_ONLY_MODULES[@]}"; do
+    if [[ $(echo "$MODULES" | grep -c "$MODULE") -ne 0 ]]; then
+      "$DRUSH" pm:uninstall $MODULE
+      echo "[info]: Uninstalled $MODULE"
     fi
   done
 fi
