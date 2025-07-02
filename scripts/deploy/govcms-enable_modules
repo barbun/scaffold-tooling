@@ -43,6 +43,7 @@ PLATFORM_MODULES=(
   "lagoon_logs"
   "environment_indicator"
   "govcms_security"
+  "govcms_akamai_purge"
 )
 
 MODULE_LIST=""
