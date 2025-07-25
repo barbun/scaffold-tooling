@@ -61,7 +61,7 @@ $config['module_permissions.settings']['managed_modules'] = [
   'paragraphs',
   'pathauto',
   'shield',
-  'symfony_mailer'
+  'symfony_mailer',
   'recaptcha',
   'redirect',
   'redirect_404',
