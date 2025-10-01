@@ -20,6 +20,8 @@ parameters:
     - message: '#^Calling print_r\(\) is forbidden, please change the code$#'
       count: 1
       path: /app/web/themes/custom/bootstrap/src/Bootstrap.php
+    # Allow undefined constants to be ignored as they are not meant to be disallowed.  
+    - message: '#^Cannot access constant#'
   disallowedStaticCalls:
     - method: 'Drupal::httpClient()'
       message: 'please change the code'

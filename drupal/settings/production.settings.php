@@ -23,8 +23,8 @@ $config['google_analytics.settings']['codesnippet']['after'] = "gtag('config', '
 // Don't show any error messages on the site (will still be shown in watchdog).
 $config['system.logging']['error_level'] = 'hide';
 
-// Set max cache lifetime to 15m by default.
-$config['system.performance']['cache']['page']['max_age'] = 900;
+// Set max cache lifetime to 1 week by default.
+$config['system.performance']['cache']['page']['max_age'] = 604800;
 if (is_numeric($max_age = getenv('CACHE_MAX_AGE'))) {
   $config['system.performance']['cache']['page']['max_age'] = $max_age;
 }
@@ -66,5 +66,6 @@ if (!empty(getenv('GOVCMS_TFA_ENFORCE'))) {
   $config['tfa.settings']['enabled'] = TRUE;
   if (empty(getenv('GOVCMS_TFA_DISABLE_REQUIRED_ROLES'))) {
     $config['tfa.settings']['required_roles']['authenticated'] = 'authenticated';
+    $config['user.role.authenticated']['permissions'][999999] = 'setup own tfa';
   }
 }

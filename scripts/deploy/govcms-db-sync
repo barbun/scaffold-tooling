@@ -73,8 +73,22 @@ fi
 
 echo "[info]: Preparing database sync"
 
+# Check for read database availability
+dump_opts=""
+if [[ -n "$MARIADB_READREPLICA_HOSTS" ]]; then
+  echo "Checking for read database availability..."
+  if tables=$("$DRUSH" sqlq 'show tables;' --database=read 2> /dev/null) && [ -n "$tables" ]; then
+    echo "Read replica database is available, using --database=read flag"
+    dump_opts="--database=read"
+  else
+    echo "Read database not available, using default database."
+  fi
+else
+  echo "No read replica hosts configured using default database."
+fi
+
 # shellcheck disable=SC2086
-"$DRUSH" --alias-path="$GOVCMS_SITE_ALIAS_PATH" @"$GOVCMS_SITE_ALIAS" sql:dump \
+"$DRUSH" --alias-path="$GOVCMS_SITE_ALIAS_PATH" @"$GOVCMS_SITE_ALIAS" sql:dump $dump_opts \
   --gzip --extra-dump=--no-tablespaces --structure-tables-list=search_index,search_total,redirect_404,cache,cache_* --result-file=/tmp/sync.sql \
   --skip-tables-key=common -y
 "$DRUSH" rsync --alias-path="$GOVCMS_SITE_ALIAS_PATH" @"$GOVCMS_SITE_ALIAS":/tmp/sync.sql.gz /tmp/ -y
