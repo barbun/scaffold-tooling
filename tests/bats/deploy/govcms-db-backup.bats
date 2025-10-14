@@ -37,7 +37,7 @@ load ../_helpers_govcms
   assert_output_contains "GovCMS Deploy :: Backup database"
   assert_output_contains "Checking for read database availability..."
   assert_output_contains "Read replica database is available, using --database=read flag"
-  assert_equal "sqlq 'show tables;' --database=read" "$(mock_get_call_args "${mock_drush}" 2)"
+  assert_equal "sqlq show tables; --database=read" "$(mock_get_call_args "${mock_drush}" 2)"
   assert_equal "sql:dump --database=read --gzip --extra-dump=--no-tablespaces --result-file=/app/web/sites/default/files/private/backups/pre-deploy-dump.sql" "$(mock_get_call_args "${mock_drush}" 3)"
 
   assert_output_contains "[success]: Completed successfully."
@@ -59,7 +59,7 @@ load ../_helpers_govcms
   assert_output_contains "GovCMS Deploy :: Backup database"
   assert_output_contains "Checking for read database availability..."
   assert_output_contains "Read database not available, using default database."
-  assert_equal "sqlq 'show tables;' --database=read" "$(mock_get_call_args "${mock_drush}" 2)"
+  assert_equal "sqlq show tables; --database=read" "$(mock_get_call_args "${mock_drush}" 2)"
   assert_equal "sql:dump --gzip --extra-dump=--no-tablespaces --result-file=/app/web/sites/default/files/private/backups/pre-deploy-dump.sql" "$(mock_get_call_args "${mock_drush}" 3)"
 
   assert_output_contains "[success]: Completed successfully."
