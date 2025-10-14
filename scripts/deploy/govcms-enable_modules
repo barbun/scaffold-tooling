@@ -58,7 +58,7 @@ if [ "$LAGOON_ENVIRONMENT_TYPE" != "production" ]; then
   # Disalbe modules we do not want on in non-prod sites
   for MODULE in "${PROD_ONLY_MODULES[@]}"; do
     if [[ $(echo "$MODULES" | grep -c "$MODULE") -ne 0 ]]; then
-      "$DRUSH" pm:uninstall $MODULE
+      "$DRUSH" pm:uninstall "$MODULE"
       echo "[info]: Uninstalled $MODULE"
     fi
   done
