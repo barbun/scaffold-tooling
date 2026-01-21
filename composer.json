@@ -5,7 +5,7 @@
   "require": {
     "drush/drush": "13.6.2",
     "drupal/lagoon_logs": "^3.0 || ^2.1",
-    "drupal/redis": "1.10.0",
+    "drupal/redis": "1.11.0",
     "drupal/stage_file_proxy": "3.1.5",
     "drupal/httpav": "1.2.0",
     "drupal/purge": "3.6.0",
