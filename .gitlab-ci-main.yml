@@ -41,6 +41,10 @@ variables:
 
       # Some local overrides are prefixed with '###' and we remove them here.
       sed -i -e "/###/d" docker-compose.yml
+      
+      # `additional_contexts` are failing in docker-in-docker, reproducible locally.
+      # Once a fix is found, the following line can be removed.
+      yq -i '(.services[] | select(.build.additional_contexts) | .build) |= del(.additional_contexts)' docker-compose.yml
 
       docker compose up -d mariadb
       docker compose up -d cli
@@ -68,6 +72,10 @@ variables:
 
       # Some local overrides are prefixed with '###' and we remove them here.
       sed -i -e "/###/d" docker-compose.yml
+      
+      # `additional_contexts` are failing in docker-in-docker, reproducible locally.
+      # Once a fix is found, the following line can be removed.
+      yq -i '(.services[] | select(.build.additional_contexts) | .build) |= del(.additional_contexts)' docker-compose.yml
 
       docker compose up -d mariadb
       docker compose up -d
