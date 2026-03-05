@@ -18,11 +18,10 @@ MARIADB_READREPLICA_HOSTS=${MARIADB_READREPLICA_HOSTS:-}
 GOVCMS_TEST_CANARY=${GOVCMS_TEST_CANARY:-FALSE}
 LAGOON_GIT_SAFE_BRANCH=${LAGOON_GIT_SAFE_BRANCH:-master}
 
-# For some projects with huge database sizes, the drush command might fail
-# due to the hardcoded drush timeout of 4 hours. If that happens, we have the
-# ability to set this variable to load the database via mysql directly,
-# thereby avoiding the drush timeout.
-DB_LOAD_NO_DRUSH=${DB_LOAD_NO_DRUSH:-FALSE}
+# Load the database via mysql directly instead of drush. This is the default
+# as it avoids the hardcoded drush timeout of 4 hours and removes PHP overhead.
+# Set to FALSE to revert to the legacy drush import path.
+DB_LOAD_NO_DRUSH=${DB_LOAD_NO_DRUSH:-TRUE}
 
 # Drush 12 support.
 DRUSH="${GOVCMS_DRUSH:-none}"
