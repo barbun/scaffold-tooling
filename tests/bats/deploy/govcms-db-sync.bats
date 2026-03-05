@@ -288,4 +288,8 @@ setup() {
   assert_output_contains "[success]: Completed successfully."
   assert_equal 4 "$(mock_get_call_num "${mock_drush}")"
   assert_equal 1 "$(mock_get_call_num "${mock_mysql}")"
+
+  mysql_args="$(mock_get_call_args "${mock_mysql}" 1)"
+  [[ "$mysql_args" == *"--skip-ssl"* ]]
+  [[ "$mysql_args" == *"--max-allowed-packet=512M"* ]]
 }
