@@ -113,7 +113,7 @@ EOF
 
   echo "[info]: Loading database using mysql"
   gunzip < /tmp/sync.sql.gz | mysql --defaults-file="$LOAD_TMP_FILE" \
-    --host="$DB_HOST" --port="$DB_PORT" "$DB_NAME"
+    --skip-ssl --max-allowed-packet=512M --host="$DB_HOST" --port="$DB_PORT" "$DB_NAME"
 else
   echo "[info]: Loading database using drush"
   gunzip < /tmp/sync.sql.gz | "$DRUSH" sqlc
