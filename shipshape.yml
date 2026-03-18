@@ -185,7 +185,6 @@ checks:
         - lagoon_logs
         - tfa
       disallowed:
-        - clamav
         - dblog
         - devel
         - module_permissions_ui
@@ -207,7 +206,6 @@ checks:
         - lagoon_logs
         - tfa
       disallowed:
-        - clamav
         - dblog
         - devel
         - module_permissions_ui
