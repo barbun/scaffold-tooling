@@ -52,7 +52,11 @@ if [[ "$GOVCMS_CACHE_REBUILD_BEFORE_DB_SYNC" = TRUE ]]; then
   echo "[info]: Rebuilding cache before database sync."
   "$DRUSH" cr
 fi
-STATUS=$("$DRUSH" status --fields=bootstrap --format=json)
+
+if [[ "$GOVCMS_TEST_CANARY" != TRUE ]]; then
+  echo "[info]: Checking bootstrap status."
+  STATUS=$("$DRUSH" status --fields=bootstrap --format=json)
+fi
 
 if [[ "$GOVCMS_TEST_CANARY" = TRUE ]]; then
   echo "[info]: Canary site... syncing."
