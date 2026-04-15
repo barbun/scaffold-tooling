@@ -14,3 +14,4 @@ parameters:
   disallowedNamespaces:
     - class: 'GuzzleHttp\Client'
       message: 'please change the code'
+ 
