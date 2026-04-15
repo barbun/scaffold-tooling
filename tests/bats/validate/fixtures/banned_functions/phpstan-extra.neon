@@ -7,14 +7,6 @@ parameters:
     - inc
   bootstrapFiles:
     - Drupal.php
-  # Disable all phpstan rules.
-  customRulesetUsed: true
-  fileExtensions:
-    - php
-    - theme
-    - inc
-  bootstrapFiles:
-    - Drupal.php
   reportUnmatchedIgnoredErrors: false
   disallowedStaticCalls:
     - method: 'Drupal::httpClient()'
