@@ -18,8 +18,23 @@ variables:
 # Test setups.
 #
 
+# Composer package cache (per project in GitLab; key rotates when composer.lock changes).
+# Projects should add ".composer-cache/" to .gitignore — it must not be committed.
+.composer_cache: &composer_cache
+  cache:
+    key:
+      files:
+        - composer.lock
+    paths:
+      - .composer-cache/
+  variables:
+    COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
+    # GovCMS/Lagoon cli images run as a non-root user; Composer uses /home/.../cache, not /root/.composer/cache.
+    COMPOSER_CACHE_CONTAINER_DIR: "/home/.composer/cache"
+
 # Minimal setup without docker, tooling available by default is https://github.com/govCMS/govcms-ci.
 .static_template: &static_template
+  <<: *composer_cache
   before_script:
     # Add support to add a bot user SSH key to validate some composer operations.
     # - |
@@ -28,12 +43,15 @@ variables:
     #    eval $(ssh-agent -s)
     #    ssh-add /home/.ssh/id_rsa
     #  fi
+    - mkdir -p "$COMPOSER_CACHE_DIR"
     - composer install
   stage: static
 
 # Minimal setup to execute drush against a working Drupal.
 .bootstrap_template: &bootstrap_template
+  <<: *composer_cache
   before_script:
+    - mkdir -p "$COMPOSER_CACHE_DIR"
     - |
       docker network prune -f && docker network create amazeeio-network
       docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -47,11 +65,14 @@ variables:
       yq -i '(.services[] | select(.build.additional_contexts) | .build) |= del(.additional_contexts)' docker-compose.yml
 
       docker compose up -d mariadb
+      # Use `run` so we can bind-mount the GitLab-cached Composer package dir into the container.
+      # Mount must match COMPOSER_CACHE_CONTAINER_DIR (cli image HOME is not /root).
+      docker compose run --rm \
+        -e "COMPOSER_CACHE_DIR=${COMPOSER_CACHE_CONTAINER_DIR}" \
+        -v "${COMPOSER_CACHE_DIR}:${COMPOSER_CACHE_CONTAINER_DIR}" \
+        cli bash -c 'composer install --no-interaction --no-suggest'
       docker compose up -d cli
       docker compose ps
-
-      # Re-run composer to account for the fact the /app just got mounted over.
-      docker compose exec -T cli bash -c 'composer install --no-interaction --no-suggest'
 
       echo "Running govcms-deploy."
       docker compose exec -T cli ./vendor/bin/govcms-deploy
@@ -59,12 +80,14 @@ variables:
 
 # Setup the full working project for integration tests like Behat.
 .full_template: &full_template
+  <<: *composer_cache
   artifacts:
     expire_in: "7 days"
     paths:
       - tests/behat/screenshots
   stage: integration
   before_script:
+    - mkdir -p "$COMPOSER_CACHE_DIR"
     - |
       docker network prune -f && docker network create amazeeio-network
       docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -82,7 +105,10 @@ variables:
       docker compose ps
 
       # Re-run composer to account for the fact the /app just got mounted over.
-      docker compose exec -T cli bash -c 'composer install --no-interaction --no-suggest'
+      docker compose run --rm \
+        -e "COMPOSER_CACHE_DIR=${COMPOSER_CACHE_CONTAINER_DIR}" \
+        -v "${COMPOSER_CACHE_DIR}:${COMPOSER_CACHE_CONTAINER_DIR}" \
+        cli bash -c 'composer install --no-interaction --no-suggest'
 
       DATABASE_IMAGE="$CI_REGISTRY_IMAGE/mariadb-drupal-data"
 
@@ -239,6 +265,7 @@ deploy:
 
 # Deprecation report.
 deprecation_report:
+  <<: *composer_cache
   stage: integration
   only:
     variables:
@@ -256,6 +283,8 @@ deprecation_report:
     # the ship-shape autoloader will use this location to determine
     # where the verification checks are located.
     APP_DIR: '/govcms'
+    COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
+    COMPOSER_CACHE_CONTAINER_DIR: "/home/.composer/cache"
   script:
     # -- Force MARIADB image when running deprecation report & smoke testing.
     - |
@@ -279,9 +308,14 @@ deprecation_report:
         rm docker-compose.override.yml 2> /dev/null
         echo -e "\033[1;33mNOTICE:\033[0m Removed docker-compose.override.yml to prevent issues with the pipeline."
       fi
+    - mkdir -p "$COMPOSER_CACHE_DIR"
     - "COMPOSE_HTTP_TIMEOUT=300 ahoy up"
     - "docker compose exec -T test dockerize -wait tcp://mariadb:3306 -timeout 2m"
-    - docker compose exec -T cli bash -c 'composer install --no-interaction --no-suggest'
+    - |
+      docker compose run --rm \
+        -e "COMPOSER_CACHE_DIR=${COMPOSER_CACHE_CONTAINER_DIR}" \
+        -v "${COMPOSER_CACHE_DIR}:${COMPOSER_CACHE_CONTAINER_DIR}" \
+        cli bash -c 'composer install --no-interaction --no-suggest'
     - "ahoy govcms-deploy"
     - "docker compose exec -T cli mkdir -p /app/web/sites/default/files/private/{backups,tmp}"
 
