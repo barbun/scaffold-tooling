@@ -5,11 +5,26 @@ set -euo pipefail
 #
 # GovCMS configuration import.
 #
+# Configuration is imported from up to three directories, in this order:
+#
+#   1. CONFIG_DEFAULT_DIR (default /app/config/default) - full import,
+#      always.
+#   2. CONFIG_DEV_DIR (default /app/config/dev) - partial import on any
+#      non-production environment, when the directory contains YAML.
+#   3. CONFIG_LOCAL_DIR (default /app/config/local) - partial import only
+#      when LAGOON_ENVIRONMENT_TYPE=local AND the directory contains YAML.
+#
+# Each subsequent --partial import overrides keys set by the previous one,
+# so config/local/ is the place to put overrides that must apply ONLY to a
+# developer's local environment (e.g. disabling the shield module) without
+# affecting public Lagoon dev/staging/branch URLs.
+#
 
 LAGOON_ENVIRONMENT_TYPE=${LAGOON_ENVIRONMENT_TYPE:-production}
 GOVCMS_DEPLOY_WORKFLOW_CONFIG=${GOVCMS_DEPLOY_WORKFLOW_CONFIG:-import}
 CONFIG_DEFAULT_DIR=${CONFIG_DEFAULT_DIR:-/app/config/default}
 CONFIG_DEV_DIR=${CONFIG_DEV_DIR:-/app/config/dev}
+CONFIG_LOCAL_DIR=${CONFIG_LOCAL_DIR:-/app/config/local}
 LAGOON_GIT_SAFE_BRANCH=${LAGOON_GIT_SAFE_BRANCH:-master}
 
 # Drush 12 support.
@@ -42,9 +57,11 @@ set +e
 config_count=$(ls -1 "$CONFIG_DEFAULT_DIR"/*.yml 2>/dev/null | wc -l)
 # shellcheck disable=SC2012
 dev_config_count=$(ls -1 "$CONFIG_DEV_DIR"/*.yml 2>/dev/null | wc -l)
+# shellcheck disable=SC2012
+local_config_count=$(ls -1 "$CONFIG_LOCAL_DIR"/*.yml 2>/dev/null | wc -l)
 set -e
 
-if [ "$config_count" -eq 0 ] && [ "$dev_config_count" -eq 0 ]; then
+if [ "$config_count" -eq 0 ] && [ "$dev_config_count" -eq 0 ] && [ "$local_config_count" -eq 0 ]; then
   # There are no configuration files to import.
   echo "[skip]: There is no configuration."
   exit 0
@@ -64,6 +81,14 @@ fi
 if [ "$LAGOON_ENVIRONMENT_TYPE" != "production" ] && [ "$dev_config_count" -gt 0 ]; then
   echo "[update]: Import dev configuration partially."
   "$DRUSH" config:import -y --source="$CONFIG_DEV_DIR" --partial
+fi
+
+# Apply local-only overrides last so they win on local environments.
+# Intentionally gated on LAGOON_ENVIRONMENT_TYPE=local (not "non-production")
+# so that public Lagoon dev/staging/branch envs cannot pick up these overrides.
+if [ "$LAGOON_ENVIRONMENT_TYPE" = "local" ] && [ "$local_config_count" -gt 0 ]; then
+  echo "[update]: Import local configuration partially."
+  "$DRUSH" config:import -y --source="$CONFIG_LOCAL_DIR" --partial
 fi
 
 echo "[success]: Completed successfully."
