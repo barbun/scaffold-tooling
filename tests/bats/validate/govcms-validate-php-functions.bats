@@ -33,8 +33,10 @@ load ../_helpers_govcms
   assert_output_contains "GovCMS Validate :: Banned PHP function list"
   assert_output_contains "8      Calling Drupal::httpClient() is forbidden, please change the code"
   assert_output_contains "10     Class GuzzleHttp\Client is forbidden, please change the code"
+  assert_output_contains "13     Calling Drupal::service() is forbidden, service"
+  assert_output_contains "\"page_cache_kill_switch\" is not allowed."
 
-  assert_output_contains "[ERROR] Found 2 errors"
+  assert_output_contains "[ERROR] Found 3 errors"
 }
 
 @test "Check banned PHP functions: inc file" {
