@@ -31,7 +31,6 @@
     "post-install-cmd": ["rm -rf ./tests"]
   },
   "bin": [
-    "scripts/govcms-audit",
     "scripts/govcms-behat",
     "scripts/govcms-lint",
     "scripts/govcms-lint-distro",
