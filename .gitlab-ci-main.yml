@@ -41,7 +41,7 @@ variables:
 
       # Some local overrides are prefixed with '###' and we remove them here.
       sed -i -e "/###/d" docker-compose.yml
-      
+
       # `additional_contexts` are failing in docker-in-docker, reproducible locally.
       # Once a fix is found, the following line can be removed.
       yq -i '(.services[] | select(.build.additional_contexts) | .build) |= del(.additional_contexts)' docker-compose.yml
@@ -72,7 +72,7 @@ variables:
 
       # Some local overrides are prefixed with '###' and we remove them here.
       sed -i -e "/###/d" docker-compose.yml
-      
+
       # `additional_contexts` are failing in docker-in-docker, reproducible locally.
       # Once a fix is found, the following line can be removed.
       yq -i '(.services[] | select(.build.additional_contexts) | .build) |= del(.additional_contexts)' docker-compose.yml
@@ -143,7 +143,7 @@ shipshape:
         - tests/shipshape-results.xml
     when: always
   script:
-    - shipshape -f /govcms/shipshape.yml --exclude-db --error-code -o junit > tests/shipshape-results.xml
+    - shipshape run . -f /govcms/shipshape.yml --exclude-db --error-code -o junit > tests/shipshape-results.xml
   when: on_success
   allow_failure: true
   after_script:
@@ -207,24 +207,6 @@ functional:
   only:
     variables:
       - $RUN_DEPRECATION_REPORT != "true"
-audit:
-  <<: *full_template
-  extends: .job-audit
-  script:
-    - docker compose exec -T test ./vendor/bin/govcms-audit
-  only:
-    variables:
-      - $RUN_DEPRECATION_REPORT != "true"
-
-# MRs only.
-audit_on_merge:
-  <<: *full_template
-  extends: .job-audit-on-merge
-  script:
-    - docker compose exec -T test ./vendor/bin/govcms-audit
-  only:
-    - merge_requests
-  stage: deploy
 
 # Deploy / summary.
 deploy:

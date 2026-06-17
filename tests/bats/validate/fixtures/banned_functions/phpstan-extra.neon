@@ -11,6 +11,13 @@ parameters:
   disallowedStaticCalls:
     - method: 'Drupal::httpClient()'
       message: 'please change the code'
+    - method: 'Drupal::service()'
+      message: 'service "page_cache_kill_switch" is not allowed.'
+      allowExceptParams:
+        -
+          position: 1
+          value: 'page_cache_kill_switch'
   disallowedNamespaces:
     - class: 'GuzzleHttp\Client'
       message: 'please change the code'
+ 
