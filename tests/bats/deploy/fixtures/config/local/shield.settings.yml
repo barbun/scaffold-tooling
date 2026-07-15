@@ -1,0 +1,11 @@
+# Sample fixture for CONFIG_LOCAL_DIR bats tests.
+#
+# Represents a typical local-only override: shield disabled on the
+# developer's machine without affecting public Lagoon dev/staging URLs.
+shield_enable: false
+credentials:
+  shield:
+    user: ''
+    pass: ''
+print: 'Restricted access.'
+allow_cli: true
