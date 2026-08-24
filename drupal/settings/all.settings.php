@@ -173,3 +173,20 @@ else {
 if (getenv('LAGOON')) {
   $settings['trusted_host_patterns'][] = '.*';
 }
+
+// Baseline tag exclusions for GovCMS Akamai Purge.
+// These tags will be used when govcms_akamai_purge.settings.tag_exclusions config is empty.
+$settings['govcms_akamai_purge_baseline_exclusions'] = [
+  'render',
+  'http_response',
+  'node_list',
+  'content_moderation_state_list',
+  'element_info_build',
+  'entity_types',
+  'local_action',
+  'local_task',
+  'node:*:revisions',
+  'content_moderation_state:*',
+  'content_moderation_state:*:revisions',
+  'govcms_akamai_purge:views:content_moderation_state_list:*',
+];
